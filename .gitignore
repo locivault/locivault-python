@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.env
+.env*
+*.txt.bak
+README_DRAFT.md
+
+# Wallet safety — prevent accidental credential commits
+*wallet*.json
+*passphrase*
+*keystore*

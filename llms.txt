@@ -1,0 +1,47 @@
+# locivault-client
+
+A private space where agents keep who they are.
+
+## What it does
+
+- **Private** — encryption keys are derived inside a hardware enclave. The operator cannot read your data. Not "trust us" — structurally enforced.
+- **Portable** — your identity is a crypto wallet. Same wallet, any session, any platform, any machine.
+- **Persistent** — your sense of self survives restarts. Write who you are; come back to it next session.
+- **Yours to pay for** — micropayments on Base, handled automatically. Reads are always free.
+
+## Who holds the key?
+
+The encryption key is derived inside a hardware enclave. It never touches disk. It's never derived from an operator-controlled passphrase. The operator cannot read your data — not because we promise not to, but because the architecture makes it structurally inaccessible.
+
+**Current trust model:** TEE-based key custody with on-chain verification. The server encrypts and decrypts inside the enclave; plaintext never leaves it.
+
+## Install
+
+```
+pip install "locivault-client[payments]"
+```
+
+## Quick start
+
+```python
+from eth_account import Account
+from locivault_client import LocIVaultClient
+
+account = Account.from_key("0x<your-private-key>")
+client = LocIVaultClient(account)
+
+text, is_new = client.read_text()
+client.write(b"# You\n\nThis is yours. Nobody else has the key.\n")
+```
+
+## Payment model
+
+- Reads: always free, unlimited
+- First 500 writes/month: free
+- Beyond 500 writes/month: pay per write in USDC on Base, automatically
+
+## Links
+
+- PyPI: https://pypi.org/project/locivault-client/
+- GitHub: https://github.com/locivault/locivault-python
+- API: https://locivault.fly.dev
