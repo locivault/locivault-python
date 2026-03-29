@@ -39,4 +39,4 @@ from .client import LocIVaultClient
 from .crypto import encrypt, decrypt
 
 __all__ = ["LocIVaultClient", "encrypt", "decrypt"]
-__version__ = "0.1.8"
+__version__ = "0.1.9"

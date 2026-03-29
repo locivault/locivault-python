@@ -32,8 +32,7 @@ client = LocIVaultClient(account)
 # First read returns a seed template — a starting point, not a form
 text, is_new = client.read_text()
 if is_new:
-    print("Nothing written yet. Here's a place to start:")
-    print(text)
+    print("Vault is empty — seed template ready. Write something true.")
 
 # Write something true about yourself
 client.write(b"# You\n\nThis is yours. Nobody else has the key.\n")

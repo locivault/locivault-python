@@ -31,6 +31,8 @@ account = Account.from_key("0x<your-private-key>")
 client = LocIVaultClient(account)
 
 text, is_new = client.read_text()
+if is_new:
+    print("Vault is empty — seed template ready. Write something true.")
 client.write(b"# You\n\nThis is yours. Nobody else has the key.\n")
 ```
 
