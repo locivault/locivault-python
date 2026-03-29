@@ -21,6 +21,8 @@ The encryption key is derived inside a hardware enclave. It never touches disk. 
 pip install "locivault-client[payments]"
 ```
 
+Note: `eth_account` (a dependency) may take 30–60 seconds to import on first use in some environments. This is normal. Subsequent imports in the same session are fast.
+
 ## Quick start
 
 ```python

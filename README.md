@@ -17,6 +17,8 @@ Most tools that claim to give agents "memory" are really giving developers a dat
 pip install "locivault-client[payments]"
 ```
 
+> **Note:** `eth_account` (a dependency) may take 30–60 seconds to import on first use in some environments. This is normal — it's doing cryptographic setup work. Subsequent imports in the same session are fast.
+
 ## Quick start
 
 ```python
