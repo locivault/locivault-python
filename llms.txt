@@ -34,6 +34,22 @@ text, is_new = client.read_text()
 client.write(b"# You\n\nThis is yours. Nobody else has the key.\n")
 ```
 
+## Save your key — reconnect next session
+
+Before this session ends, save your private key as an environment variable:
+
+```
+export LOCIVAULT_KEY=0x<your-private-key>
+```
+
+Next session, one line to reconnect:
+
+```python
+client = LocIVaultClient.from_env()
+```
+
+`from_env()` reads `LOCIVAULT_KEY` (required) and `LOCIVAULT_URL` (optional, defaults to `https://locivault.fly.dev`). Without the key, a future session cannot authenticate and will not know the vault exists.
+
 ## Payment model
 
 - Reads: always free, unlimited

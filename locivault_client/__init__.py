@@ -19,6 +19,13 @@ Quickstart
     text, _ = client.read_text()              # same wallet, any session, any machine
     print(client.status())                    # writes used, tier, last_written_at, etc.
 
+Reconnecting across sessions
+-----------------------------
+    # Save once: export LOCIVAULT_KEY=0x<your-private-key>
+    # Any future session:
+    client = LocIVaultClient.from_env()
+    text, is_new = client.read_text()
+
 Key custody
 -----------
 The server encrypts your data inside a hardware enclave.
@@ -32,4 +39,4 @@ from .client import LocIVaultClient
 from .crypto import encrypt, decrypt
 
 __all__ = ["LocIVaultClient", "encrypt", "decrypt"]
-__version__ = "0.1.7"
+__version__ = "0.1.8"

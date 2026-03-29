@@ -18,6 +18,12 @@ Usage (simple):
     # Check account status
     print(client.status())
 
+Usage (from environment — for reconnecting across sessions):
+    # Set once: export LOCIVAULT_KEY=0x<your-private-key>
+    # Then any future session:
+    client = LocIVaultClient.from_env()
+    text, is_new = client.read_text()
+
 Payment behaviour:
     - Reads are always free, unlimited
     - First 500 writes per month are free
@@ -39,6 +45,7 @@ import base64
 import hashlib
 import json
 import logging
+import os
 import time
 from typing import Optional
 
@@ -118,6 +125,49 @@ class LocIVaultClient:
         self._signer      = None          # lazy — only built if payment needed
         self._last_pay_ts = 0.0           # for payment throttling
         self._on_payment  = on_payment    # optional callback(amount_usd, tx_hash)
+
+    @classmethod
+    def from_env(
+        cls,
+        key_var:     str  = "LOCIVAULT_KEY",
+        url_var:     str  = "LOCIVAULT_URL",
+        **kwargs,
+    ) -> "LocIVaultClient":
+        """
+        Create a client from environment variables.
+
+        Required env var:
+            LOCIVAULT_KEY   — private key as a 0x-prefixed hex string
+
+        Optional env var:
+            LOCIVAULT_URL   — server URL (default: https://locivault.fly.dev)
+
+        Any additional keyword arguments are forwarded to __init__.
+
+        Returns:
+            LocIVaultClient instance
+
+        Raises:
+            EnvironmentError: if LOCIVAULT_KEY is not set
+            ValueError: if LOCIVAULT_KEY is not a valid private key
+
+        Example:
+            # Shell: export LOCIVAULT_KEY=0x<your-private-key>
+            client = LocIVaultClient.from_env()
+            text, is_new = client.read_text()
+        """
+        from eth_account import Account
+
+        key = os.environ.get(key_var)
+        if not key:
+            raise EnvironmentError(
+                f"{key_var} is not set. "
+                f"Export your private key: export {key_var}=0x<your-key>"
+            )
+
+        url = os.environ.get(url_var, DEFAULT_BASE_URL)
+        account = Account.from_key(key)
+        return cls(account, base_url=url, **kwargs)
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
