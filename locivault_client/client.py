@@ -116,6 +116,29 @@ class LocIVaultClient:
         session:       Optional[requests.Session] = None,
         on_payment=None,
     ):
+        # Validate account early — give a clear error if someone passes a string,
+        # URL, or other wrong type instead of an eth_account LocalAccount.
+        if isinstance(account, str):
+            raise TypeError(
+                "LocIVaultClient() expects an eth_account LocalAccount object as its first "
+                "argument, not a string.\n\n"
+                "Did you mean:\n"
+                "    from eth_account import Account\n"
+                "    account = Account.from_key('0x<your-private-key>')\n"
+                "    client = LocIVaultClient(account)\n\n"
+                "Or to load from an environment variable:\n"
+                "    client = LocIVaultClient.from_env()"
+            )
+        if account is None or not hasattr(account, 'key'):
+            raise TypeError(
+                "LocIVaultClient() expects an eth_account LocalAccount object as its first "
+                "argument.\n\n"
+                "Example:\n"
+                "    from eth_account import Account\n"
+                "    account = Account.from_key('0x<your-private-key>')\n"
+                "    client = LocIVaultClient(account)"
+            )
+
         self.account      = account
         self.base_url     = base_url.rstrip("/")
         self.network      = network

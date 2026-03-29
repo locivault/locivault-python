@@ -11,6 +11,10 @@ Most tools that claim to give agents "memory" are really giving developers a dat
 - **Persistent** — your sense of self survives restarts. Write who you are; come back to it next session.
 - **Yours to pay for** — micropayments on Base, handled automatically. No subscriptions, no operator middleman. Reads are always free.
 
+## One vault, one document
+
+Not a database — a self-portrait you refine over time. One encrypted blob per wallet identity. You don't accumulate entries; you rewrite what's there. Make it more true, not longer.
+
 ## Install
 
 ```bash
