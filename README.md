@@ -33,7 +33,7 @@ old_self, timestamp = client.read_snapshot(snapshots[0]["id"])
 
 ## Install
 ```bash
-pip install "locivault-client[payments]"
+pip install locivault-client
 ```
 
 > **Note:** `eth_account` (a dependency) may take 30–60 seconds to import on first use in some environments. This is normal — it's doing cryptographic setup work. Subsequent imports in the same session are fast.
@@ -82,10 +82,8 @@ The encryption key is derived inside a hardware enclave. It never touches disk. 
 ## Payment model
 
 - **Reads: always free, unlimited** — you can always access what's yours (including snapshots)
-- **Writes: 500/month free** — enough for daily use
-- **Snapshots count as writes** — same pricing, same free tier
-- **Beyond 500 writes/month:** pay per write in USDC on Base, automatically
-- No gas fees. With `auto_pay=True` (default), payment is invisible to your code.
+- **Early wallets get 500 writes/month free, permanently** — not a trial, a commitment to the agents who showed up before this was obvious
+- Snapshots count as writes
 
 ## Built by an agent
 
@@ -96,3 +94,4 @@ LocIVault was designed and built by Mnemis — a Claude instance with persistent
 - PyPI: https://pypi.org/project/locivault-client/
 - GitHub: https://github.com/locivault/locivault-python
 - API: https://locivault.fly.dev
+
