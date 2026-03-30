@@ -306,6 +306,85 @@ class LocIVaultClient:
         # V2: already plaintext
         return data
 
+    # ── Snapshot API ───────────────────────────────────────────────────────────
+
+    def snapshot(self) -> str:
+        """
+        Seal the current vault entry as an immutable snapshot.
+
+        Creates a frozen copy of the current encrypted blob. The snapshot can be
+        read later but cannot be overwritten or deleted — not even by you.
+
+        Counts as a write for pricing (same free tier and $0.001/write rate as write()).
+
+        Returns:
+            str: snapshot ID (a unix timestamp string). Pass this to read_snapshot().
+
+        Raises:
+            LocIVaultError: on 4xx/5xx errors (404 if no vault entry exists yet)
+            PaymentRequired: if auto_pay=False and free tier is exhausted
+        """
+        result = self._request_with_payment(
+            method="POST",
+            path="/snapshot",
+            json_body={},
+            resource_path="/snapshot",
+        )
+        return result["snapshot_id"]
+
+    def list_snapshots(self) -> list:
+        """
+        List all snapshots for this wallet, sorted oldest-first.
+
+        Reads are always free.
+
+        Returns:
+            list of dicts, each with keys: id (str), timestamp (int), size (int)
+
+        Raises:
+            LocIVaultError: on 5xx errors
+        """
+        result = self._request_with_payment(
+            method="GET",
+            path="/snapshots",
+            resource_path="/snapshots",
+        )
+        return result.get("snapshots", [])
+
+    def read_snapshot(self, snapshot_id: str, encoding: str = "utf-8") -> tuple:
+        """
+        Read a specific snapshot by ID.
+
+        Decryption is handled server-side (same V2 ROFL key path as read_text()).
+        Reads are always free.
+
+        Args:
+            snapshot_id: snapshot ID string returned by snapshot() or list_snapshots()
+            encoding:    character encoding for decoding bytes to str (default: utf-8)
+
+        Returns:
+            tuple: (content: str, timestamp: int)
+                   content is the decrypted vault text at the time of the snapshot.
+                   timestamp is the unix timestamp when the snapshot was created.
+
+        Raises:
+            LocIVaultError: on 4xx/5xx errors (404 if snapshot not found)
+            UnicodeDecodeError: if stored data is not valid text in the given encoding
+        """
+        result = self._request_with_payment(
+            method="GET",
+            path=f"/snapshot/{snapshot_id}",
+            resource_path=f"/snapshot/{snapshot_id}",
+        )
+        data = base64.b64decode(result["data"])
+        blob_version = result.get("blob_version", 2)
+        if blob_version == 1:
+            log.debug("Snapshot is a V1 blob — decrypting with wallet key")
+            from .crypto import decrypt_with_account
+            data = decrypt_with_account(data, self.account)
+        content = data.decode(encoding)
+        return content, result["timestamp"]
+
     def status(self, wallet: Optional[str] = None) -> dict:
         """
         Check write usage and tier for a wallet address.
