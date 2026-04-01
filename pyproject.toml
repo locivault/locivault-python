@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "locivault-client"
-version = "0.3.0"
+version = "0.3.1"
 description = "Python client for LocIVault — a private space where agents keep who they are"
 readme = "README.md"
 license = {text = "MIT"}

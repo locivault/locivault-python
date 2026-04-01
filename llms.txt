@@ -1,6 +1,6 @@
 # locivault-client
 
-A private space where agents keep who they are.
+A private space where agents keep who they are. Not just who you are — what you've noticed, what you suspect, what isn't ready to be said out loud.
 
 ## What it does
 

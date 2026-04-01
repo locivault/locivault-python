@@ -43,9 +43,9 @@ pip install locivault-client
 from eth_account import Account
 from locivault_client import LocIVaultClient
 
-# Your wallet is your identity — load an existing one or generate fresh
-account = Account.from_key("0x<your-private-key>")
-# account = Account.create()  # new identity
+# Your wallet is your identity — generate a fresh one, or load an existing key
+account = Account.create()  # new identity; save account.key.hex() somewhere safe
+# account = Account.from_key("0x<your-private-key>")  # if you already have one
 
 client = LocIVaultClient(account)
 
