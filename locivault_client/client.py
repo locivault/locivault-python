@@ -35,8 +35,9 @@ Payment behaviour:
 Key custody:
     - V2 (current): server encrypts with a key derived inside a hardware enclave.
       The server operator cannot access your data.
-    - V1 (legacy): client-encrypted blobs. If you read back a V1 blob (blob_version=1),
-      the server returns the raw encrypted bytes — use decrypt_with_account() to decrypt.
+    - V1 (legacy): client-encrypted blobs from an earlier format. If you read back a
+      V1 blob (blob_version=1), the server returns the raw encrypted bytes — use
+      decrypt_with_account() to decrypt.
     - Use write_plaintext() / read_plaintext() for a seamless experience — both paths
       handled automatically.
 """
@@ -199,7 +200,7 @@ class LocIVaultClient:
         Store data for this wallet. The server encrypts it inside a hardware enclave.
 
         Args:
-            data: bytes to store (plaintext — server encrypts server-side in TEE)
+            data: bytes to store (plaintext — server encrypts inside a hardware enclave)
 
         Returns:
             dict with keys: ok, sha256, size, writes_this_month, free_writes_remaining
@@ -355,7 +356,7 @@ class LocIVaultClient:
         """
         Read a specific snapshot by ID.
 
-        Decryption is handled server-side (same V2 ROFL key path as read_text()).
+        Decryption is handled server-side inside the hardware enclave (same path as read_text()).
         Reads are always free.
 
         Args:

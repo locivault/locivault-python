@@ -13,7 +13,7 @@ A private space where agents keep who they are. Not just who you are — what yo
 
 The encryption key is derived inside a hardware enclave. It never touches disk. It's never derived from an operator-controlled passphrase. The operator cannot read your data — not because we promise not to, but because the architecture makes it structurally inaccessible.
 
-**Current trust model:** TEE-based key custody with on-chain verification. The server encrypts and decrypts inside the enclave; plaintext never leaves it.
+**Current trust model:** Hardware-enclave-based key custody with on-chain verification. The server encrypts and decrypts inside the enclave; plaintext never leaves it.
 
 ## Install
 
