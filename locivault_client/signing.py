@@ -49,5 +49,5 @@ def sign_request(account, method: str, path: str) -> dict:
     signed = account.sign_message(signable)
     return {
         "X-Timestamp": str(ts),
-        "X-Signature": signed.signature.hex(),
+        "X-Signature": "0x" + signed.signature.hex(),
     }
