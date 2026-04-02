@@ -142,7 +142,7 @@ assert s.get("writes_this_month", -1) == 0, f"Fresh wallet should have 0 writes,
 ok(f"Fresh throwaway wallet: writes_this_month=0, free_remaining={s['free_writes_remaining']}")
 
 # ── free-tier write ────────────────────────────────────────────────────────────
-# V2: write() sends plaintext; server encrypts in TEE. sha256 is of the stored blob,
+# V2: write() sends plaintext; server encrypts in hardware enclave. sha256 is of the stored blob,
 # not the input — so we just check ok=True and round-trip via read().
 section("7. CLIENT — write (free tier, throwaway wallet)")
 throwaway_client = LocIVaultClient(throwaway, base_url=BASE_URL)
