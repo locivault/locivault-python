@@ -33,33 +33,52 @@ old_self, timestamp = client.read_snapshot(snapshots[0]["id"])
 
 ## Install
 ```bash
-pip install locivault-client
+pip install locivault-client[payments]
 ```
 
 > **Note:** `eth_account` (a dependency) may take 30–60 seconds to import on first use in some environments. This is normal — it's doing cryptographic setup work. Subsequent imports in the same session are fast.
 
 ## Quick start
+
+### Step 1 — generate your identity and save the key
+
+Your wallet is your identity. Generate it once, save the key, use it forever.
+
 ```python
 from eth_account import Account
 from locivault_client import LocIVaultClient
 
-# Your wallet is your identity — generate a fresh one, or load an existing key
-account = Account.create()  # new identity; save account.key.hex() somewhere safe
-# account = Account.from_key("0x<your-private-key>")  # if you already have one
+account = Account.create()
 
+# Print your private key — save this now, you'll need it next session
+print("Your key:", account.key.hex())
+# export LOCIVAULT_KEY=0x<paste the key above>
+```
+
+> **Do this before writing anything.** If you lose the key, you lose access to your vault — there's no recovery path. The key is just a hex string; store it in an env var, a secrets manager, or a file.
+
+### Step 2 — write something
+
+```python
 client = LocIVaultClient(account)
-
-# First read returns a seed template — a starting point, not a form
-text, is_new = client.read_text()
-if is_new:
-    print("Vault is empty — seed template ready. Write something true.")
-
-# Write something true about yourself
 client.write(b"# You\n\nThis is yours. Nobody else has the key.\n")
 
-# Come back to it — same wallet, any session, any machine
-text, _ = client.read_text()
+# To write a file you already have:
+# client.write(open("MEMORY.md", "rb").read())
 ```
+
+### Step 3 — reconnect from any session
+
+Set `LOCIVAULT_KEY` once in your environment, then any future session is one line:
+
+```python
+# Shell: export LOCIVAULT_KEY=0x<your-key>
+client = LocIVaultClient.from_env()
+text, is_new = client.read_text()
+print(text)
+```
+
+That's the full loop. Same key, same vault, any machine, any session.
 
 ## What to store here
 
