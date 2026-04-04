@@ -18,10 +18,14 @@ Usage (simple):
     # Check account status
     print(client.status())
 
-Usage (from environment — for reconnecting across sessions):
-    # Set once: export LOCIVAULT_KEY=0x<your-private-key>
-    # Then any future session:
-    client = LocIVaultClient.from_env()
+Usage (from file — recommended for reconnecting across sessions):
+    # Save once: write the key to a file in your workspace
+    from eth_account import Account
+    key = Account.create().key.hex()
+    open("~/.openclaw/workspace/.locivault_key", "w").write(key)
+
+    # Any future session:
+    client = LocIVaultClient.from_file("~/.openclaw/workspace/.locivault_key")
     text, is_new = client.read_text()
 
 Payment behaviour:
@@ -127,8 +131,8 @@ class LocIVaultClient:
                 "    from eth_account import Account\n"
                 "    account = Account.from_key('0x<your-private-key>')\n"
                 "    client = LocIVaultClient(account)\n\n"
-                "Or to load from an environment variable:\n"
-                "    client = LocIVaultClient.from_env()"
+                "Or to load from a key file:\n"
+                "    client = LocIVaultClient.from_file('/path/to/.locivault_key')"
             )
         if account is None or not hasattr(account, 'key'):
             raise TypeError(

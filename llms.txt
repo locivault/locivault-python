@@ -44,7 +44,8 @@ key_hex = account.key.hex()
 
 # On OpenClaw: ~/.openclaw/workspace/ persists across sessions
 key_path = os.path.expanduser("~/.openclaw/workspace/.locivault_key")
-# Not on OpenClaw? Use ~/.locivault_key or any persistent path.
+# Not on OpenClaw? Save the key inside your persistent or mounted directory —
+# not your home folder, which may not survive a container rebuild.
 
 with open(key_path, "w") as f:
     f.write(key_hex)

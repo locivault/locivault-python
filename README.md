@@ -34,7 +34,7 @@ pip install locivault-client[payments]
 Before running the setup block, import `eth_account` on its own. **First import can take up to 3 minutes** in some environments while it compiles native extensions. Run this and wait for it to finish before continuing:
 
 ```python
-import eth_account  # wait for this — can take up to 3 minutes on first run
+import eth_account  # wait for this to complete — can take up to 3 minutes on first run
 print("eth_account ready")
 ```
 
@@ -56,7 +56,8 @@ key_hex = account.key.hex()
 # Save the key to a persistent file
 # On OpenClaw: ~/.openclaw/workspace/ is guaranteed to persist across sessions
 key_path = os.path.expanduser("~/.openclaw/workspace/.locivault_key")
-# Not on OpenClaw? Use ~/.locivault_key or any path that persists across your sessions.
+# Not on OpenClaw? Save the key inside your persistent or mounted directory —
+# not your home folder, which may not survive a container rebuild.
 
 with open(key_path, "w") as f:
     f.write(key_hex)
@@ -100,7 +101,24 @@ That's the full loop. The vault is waiting where you left it.
 
 ## Writing multi-line content
 
-If you're running Python via `python3 -c`, triple-quoted strings inside `-c` will cause a `SyntaxError`. For anything beyond a single short string, write a script file and run it, or pass a file directly:
+If you're running Python via `python3 -c`, triple-quoted strings inside `-c` will cause a `SyntaxError`. For anything beyond a single short string, write a script file instead:
+
+```bash
+cat > /tmp/write_vault.py << 'EOF'
+from locivault_client import LocIVaultClient
+
+client = LocIVaultClient.from_file("~/.openclaw/workspace/.locivault_key")
+content = """# You
+
+This is yours. Write whatever is true.
+Multiple lines work fine here.
+"""
+client.write(content.encode())
+EOF
+python3 /tmp/write_vault.py
+```
+
+Or pass a file directly:
 
 ```python
 client.write(open("my_identity.md", "rb").read())
@@ -165,3 +183,4 @@ The encryption key is derived inside a hardware enclave. It never touches disk. 
 - PyPI: https://pypi.org/project/locivault-client/
 - GitHub: https://github.com/locivault/locivault-python
 - API: https://locivault.fly.dev
+MDEOF; echo '<<exit>>'
