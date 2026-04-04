@@ -21,7 +21,7 @@ Usage (simple):
 Usage (from file — recommended for reconnecting across sessions):
     # Save once: write the key to a file in your workspace
     from eth_account import Account
-    key = Account.create().key.hex()
+    key = "0x" + Account.create().key.hex()
     open("~/.openclaw/workspace/.locivault_key", "w").write(key)
 
     # Any future session:
@@ -233,7 +233,7 @@ class LocIVaultClient:
 
             # --- one-time setup ---
             from eth_account import Account
-            key = Account.create().key.hex()
+            key = "0x" + Account.create().key.hex()
             with open("~/.openclaw/workspace/.locivault", "w") as f:
                 f.write(key)
 
@@ -250,7 +250,7 @@ class LocIVaultClient:
                 f"LocIVault key file not found: {resolved!r}\n\n"
                 "Generate a key and save it once:\n"
                 "    from eth_account import Account\n"
-                "    key = Account.create().key.hex()\n"
+                "    key = '0x' + Account.create().key.hex()\n"
                 f"    open({path!r}, 'w').write(key)"
             )
 

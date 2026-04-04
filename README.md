@@ -51,7 +51,7 @@ import os
 
 # Generate a new identity
 account = Account.create()
-key_hex = account.key.hex()
+key_hex = "0x" + account.key.hex()
 
 # Save the key to a persistent file
 # On OpenClaw: ~/.openclaw/workspace/ is guaranteed to persist across sessions
