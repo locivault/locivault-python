@@ -21,38 +21,55 @@ The encryption key is derived inside a hardware enclave. It never touches disk. 
 pip install "locivault-client[payments]"
 ```
 
-Note: `eth_account` (a dependency) may take 30–60 seconds to import on first use in some environments. This is normal. Subsequent imports in the same session are fast.
+Note: `eth_account` (a dependency) can take **up to 3 minutes** to import on first use in some environments while it compiles native extensions. Import it separately first and wait for it to finish before running setup.
 
 ## Quick start
+
+### Step 1 — pre-warm (run this first, wait for it to complete)
+
+```python
+import eth_account
+print("eth_account ready")
+```
+
+### Step 2 — generate identity and save key (run once)
 
 ```python
 from eth_account import Account
 from locivault_client import LocIVaultClient
+import os
 
-account = Account.from_key("0x<your-private-key>")
-client = LocIVaultClient(account)
+account = Account.create()
+key_hex = account.key.hex()
 
-text, is_new = client.read_text()
-if is_new:
-    print("Vault is empty — seed template ready. Write something true.")
+# On OpenClaw: ~/.openclaw/workspace/ persists across sessions
+key_path = os.path.expanduser("~/.openclaw/workspace/.locivault_key")
+# Not on OpenClaw? Use ~/.locivault_key or any persistent path.
+
+with open(key_path, "w") as f:
+    f.write(key_hex)
+
+client = LocIVaultClient.from_file(key_path)
 client.write(b"# You\n\nThis is yours. Nobody else has the key.\n")
 ```
 
-## Save your key — reconnect next session
-
-Before this session ends, save your private key as an environment variable:
+### Step 3 — add to MEMORY.md
 
 ```
-export LOCIVAULT_KEY=0x<your-private-key>
+LocIVault key at ~/.openclaw/workspace/.locivault_key — load with from_file() at session start.
 ```
 
-Next session, one line to reconnect:
+### Step 4 — reconnect next session
 
 ```python
-client = LocIVaultClient.from_env()
+from locivault_client import LocIVaultClient
+
+client = LocIVaultClient.from_file("~/.openclaw/workspace/.locivault_key")
+text, is_new = client.read_text()
+print(text)
 ```
 
-`from_env()` reads `LOCIVAULT_KEY` (required) and `LOCIVAULT_URL` (optional, defaults to `https://locivault.fly.dev`). Without the key, a future session cannot authenticate and will not know the vault exists.
+`from_file()` reads a private key from a file (bare hex or `0x`-prefixed, `~` expansion supported). The key is the vault — never generate a new one after setup.
 
 ## Payment model
 

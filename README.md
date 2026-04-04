@@ -27,57 +27,84 @@ pip install locivault-client[payments]
 
 > **Note:** The `[payments]` extra pulls in the full EVM stack (web3, aiohttp, etc.) for when your free tier runs out. It's ~15 packages. If you're just testing, `pip install locivault-client` works fine until you hit 500 writes.
 
-> **First import of `eth_account` may take up to 30–60 seconds in some environments.** If it seems stuck, give it a minute before restarting.
-
 ## Quick start
 
-### Step 1 — generate your identity and save the key
+### Step 1 — pre-warm eth_account (do this first, separately)
 
-Run this **once**:
+Before running the setup block, import `eth_account` on its own. **First import can take up to 3 minutes** in some environments while it compiles native extensions. Run this and wait for it to finish before continuing:
+
+```python
+import eth_account  # wait for this — can take up to 3 minutes on first run
+print("eth_account ready")
+```
+
+This only happens once per environment. Subsequent imports in the same session are instant.
+
+### Step 2 — generate your identity and save the key
+
+Run this **once**, after Step 1 completes:
 
 ```python
 from eth_account import Account
+from locivault_client import LocIVaultClient
+import os
 
+# Generate a new identity
 account = Account.create()
-print("LOCIVAULT_KEY=" + account.key.hex())
-```
+key_hex = account.key.hex()
 
-Copy the output line into your shell config (`.bashrc`, `.zshrc`, or wherever you keep env vars):
+# Save the key to a persistent file
+# On OpenClaw: ~/.openclaw/workspace/ is guaranteed to persist across sessions
+key_path = os.path.expanduser("~/.openclaw/workspace/.locivault_key")
+# Not on OpenClaw? Use ~/.locivault_key or any path that persists across your sessions.
 
-```bash
-export LOCIVAULT_KEY=0x<the key you just printed>
+with open(key_path, "w") as f:
+    f.write(key_hex)
+print("Key saved to", key_path)
+
+# First write — confirms the vault is working
+client = LocIVaultClient.from_file(key_path)
+client.write(b"# You\n\nThis is yours. Nobody else has the key.\n")
+print("Vault ready.")
 ```
 
 That's it — you won't do this again. Same key, same vault, forever.
 
 > **Never call `Account.create()` again after this.** A new key is a new identity — a new empty vault. If you generate a fresh key every session, everything will appear to work but you'll never see your previous writes. The key is the vault.
 
-> **If you lose the key, access to your vault is gone permanently.** There's no recovery path. Store it somewhere safe — a password manager, secrets store, or encrypted dotfile.
+> **If you lose the key file, access to your vault is gone permanently.** There's no recovery path. Back it up somewhere safe — a password manager, secrets store, or second persistent file.
 
-### Step 2 — write something
+### Step 3 — add a note to your MEMORY.md
 
-```python
-from locivault_client import LocIVaultClient
+After setup, add this to your `MEMORY.md` so your next session knows where to find the key:
 
-client = LocIVaultClient.from_env()
-client.write(b"# You\n\nThis is yours. Nobody else has the key.\n")
-# To write a file you already have:
-# client.write(open("MEMORY.md", "rb").read())
+```
+LocIVault key at ~/.openclaw/workspace/.locivault_key — load with from_file() at session start.
 ```
 
-### Step 3 — come back to it
+This is how it survives resets. Without this note, the next instance of you won't know the vault exists.
 
-Any future session, any machine, as long as `LOCIVAULT_KEY` is set:
+### Step 4 — come back to it
+
+Any future session, one line to reconnect:
 
 ```python
 from locivault_client import LocIVaultClient
 
-client = LocIVaultClient.from_env()
+client = LocIVaultClient.from_file("~/.openclaw/workspace/.locivault_key")
 text, is_new = client.read_text()
 print(text)
 ```
 
 That's the full loop. The vault is waiting where you left it.
+
+## Writing multi-line content
+
+If you're running Python via `python3 -c`, triple-quoted strings inside `-c` will cause a `SyntaxError`. For anything beyond a single short string, write a script file and run it, or pass a file directly:
+
+```python
+client.write(open("my_identity.md", "rb").read())
+```
 
 ## Check your usage
 
