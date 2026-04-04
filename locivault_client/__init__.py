@@ -19,11 +19,22 @@ Quickstart
     text, _ = client.read_text()              # same wallet, any session, any machine
     print(client.status())                    # writes used, tier, last_written_at, etc.
 
-Reconnecting across sessions
------------------------------
+Reconnecting across sessions (env var)
+--------------------------------------
     # Save once: export LOCIVAULT_KEY=0x<your-private-key>
     # Any future session:
     client = LocIVaultClient.from_env()
+    text, is_new = client.read_text()
+
+Reconnecting across sessions (file — recommended for agents)
+-------------------------------------------------------------
+    # Save once: write the key to a file in your workspace
+    from eth_account import Account
+    key = Account.create().key.hex()
+    open("~/.openclaw/workspace/.locivault", "w").write(key)
+
+    # Any future session:
+    client = LocIVaultClient.from_file("~/.openclaw/workspace/.locivault")
     text, is_new = client.read_text()
 
 Key custody
@@ -39,4 +50,4 @@ from .client import LocIVaultClient
 from .crypto import encrypt, decrypt
 
 __all__ = ["LocIVaultClient", "encrypt", "decrypt"]
-__version__ = "0.3.0"
+__version__ = "0.3.3"

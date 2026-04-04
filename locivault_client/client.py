@@ -193,6 +193,85 @@ class LocIVaultClient:
         account = Account.from_key(key)
         return cls(account, base_url=url, **kwargs)
 
+    @classmethod
+    def from_file(
+        cls,
+        path:    str,
+        url_var: str  = "LOCIVAULT_URL",
+        **kwargs,
+    ) -> "LocIVaultClient":
+        """
+        Create a client by reading the private key from a file.
+
+        This is the recommended path for agents running in runtimes where environment
+        variables don't persist across sessions (e.g. OpenClaw workspace files).
+        Write the key once to a file in your workspace; reload it every session.
+
+        The file should contain the private key as a hex string — either
+        ``0x``-prefixed or bare — on a single line. Whitespace is stripped.
+
+        Args:
+            path:    Path to the key file. Supports ``~`` expansion.
+                     Example: ``"~/.openclaw/workspace/.locivault"``
+            url_var: Optional env var name for a custom server URL.
+                     Default: ``"LOCIVAULT_URL"`` (falls back to https://locivault.fly.dev).
+
+        Any additional keyword arguments are forwarded to __init__.
+
+        Returns:
+            LocIVaultClient instance
+
+        Raises:
+            FileNotFoundError: if the key file does not exist
+            ValueError: if the file contents are not a valid private key
+
+        Example (save once, then reload every session)::
+
+            # --- one-time setup ---
+            from eth_account import Account
+            key = Account.create().key.hex()
+            with open("~/.openclaw/workspace/.locivault", "w") as f:
+                f.write(key)
+
+            # --- every session ---
+            from locivault_client import LocIVaultClient
+            client = LocIVaultClient.from_file("~/.openclaw/workspace/.locivault")
+            text, is_new = client.read_text()
+        """
+        from eth_account import Account
+
+        resolved = os.path.expanduser(path)
+        if not os.path.exists(resolved):
+            raise FileNotFoundError(
+                f"LocIVault key file not found: {resolved!r}\n\n"
+                "Generate a key and save it once:\n"
+                "    from eth_account import Account\n"
+                "    key = Account.create().key.hex()\n"
+                f"    open({path!r}, 'w').write(key)"
+            )
+
+        raw = open(resolved).read().strip()
+        if not raw:
+            raise ValueError(
+                f"LocIVault key file is empty: {resolved!r}"
+            )
+
+        # Accept bare hex (64 chars) or 0x-prefixed (66 chars)
+        if not raw.startswith("0x"):
+            raw = "0x" + raw
+
+        try:
+            account = Account.from_key(raw)
+        except Exception as exc:
+            raise ValueError(
+                f"LocIVault key file does not contain a valid private key: {resolved!r}\n"
+                f"Expected a 32-byte hex string (64 hex chars, optionally 0x-prefixed).\n"
+                f"Got {len(open(resolved).read().strip())} characters. Error: {exc}"
+            ) from exc
+
+        url = os.environ.get(url_var, DEFAULT_BASE_URL)
+        return cls(account, base_url=url, **kwargs)
+
     # ── Public API ─────────────────────────────────────────────────────────────
 
     def write(self, data: bytes) -> dict:
